@@ -57,8 +57,9 @@
       thisProduct.id = id; //wlasciwosc id dodana do stalej this = id? czy poprostu zapis stalej w pr.obiektowym?
       thisProduct.data = data;
       thisProduct.renderInMenu();//jak przeczytac te linie?
-      console.log('new Product:', thisProduct);
       thisProduct.initAccordion();// potrzebne tu jest do wywolania metofy thisProduct. Dlaczego?
+      thisProduct.initOrderForm();
+      thisProduct.processOrder();
     }
     renderInMenu(){
       const thisProduct = this;
@@ -73,11 +74,10 @@
       /* add element to menu */
       menuContainer.appendChild(thisProduct.element); //do elementu menuContainer dodaj element stalej this Product?
     }
-    getElements(){
+    getElements(){ //te wartosci w ogole nie sa czytane przez inne metody. Dlaczego i co jest zle zadeklarowa
       const thisProduct = this;
 
       thisProduct.accordionTrigger = thisProduct.element.querySelector(select.menuProduct.clickable);
-      console.log('accordionTrigger', thisProduct.accordionTrigger);
       thisProduct.form = thisProduct.element.querySelector(select.menuProduct.form);
       thisProduct.formInputs = thisProduct.form.querySelectorAll(select.all.formInputs);
       thisProduct.cartButton = thisProduct.element.querySelector(select.menuProduct.cartButton);
@@ -108,19 +108,37 @@
       /* END: click event listener to trigger */
       });
     }
+
     initOrderForm() { //odpowiedzialna za dodanie listenerów eventów do formularza, jego kontrolek, oraz guzika dodania do koszyka.
         const thisProduct = this;
         console.log('initOrderForm');
+        thisProduct.form.addEventListener('submit', function(event){
+        event.preventDefault();
+        thisProduct.processOrder();
+        });
+
+        for(let input of thisProduct.formInputs){
+        input.addEventListener('change', function(){
+        thisProduct.processOrder();
+        });
+        }
+
+        thisProduct.cartButton.addEventListener('click', function(event){
+        event.preventDefault();
+        thisProduct.processOrder();
+        });
     }
     processOrder() {
       const thisProduct = this;
       console.log('processOrder');
+      const formData = utils.serializeFormToObject(thisProduct.form);
+      console.log('formData', formData);
     }
+
   }
   const app = {
     initMenu(){
       const thisApp = this;
-      console.log('thisApp.data:',thisApp.data);
       for(let productData in thisApp.data.products){ //co to za zabior elementow? this.App.data.ptroducts?
         new Product(productData, thisApp.data.products[productData]);
       }
@@ -142,4 +160,5 @@
   };
 
   app.init();
+
 }
